@@ -1,0 +1,10 @@
+const int array[2] = {1,2};
+\\ This is annotation
+####
+int main(){
+    int c;
+    c = getint();
+    printf("output is %d",c);
+    return c;
+}
+

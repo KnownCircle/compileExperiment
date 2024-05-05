@@ -1,0 +1,8 @@
+void main(){
+    // 这一行是注释
+    char email[]="zhiyuanli0122@outlook.com";
+    int a=123*4+5-6/7;
+    printf("%d",a);
+    // 测试只有一个双引号的错误
+    "this is a wrong string
+}
