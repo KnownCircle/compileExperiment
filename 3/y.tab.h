@@ -63,7 +63,8 @@ extern int yydebug;
     RP = 264,                      /* RP  */
     AND = 265,                     /* AND  */
     OR = 266,                      /* OR  */
-    NUM = 267                      /* NUM  */
+    NOT = 267,                     /* NOT  */
+    NUM = 268                      /* NUM  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -81,7 +82,8 @@ extern int yydebug;
 #define RP 264
 #define AND 265
 #define OR 266
-#define NUM 267
+#define NOT 267
+#define NUM 268
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -91,7 +93,7 @@ union YYSTYPE
 
   double d_num;
 
-#line 95 "y.tab.h"
+#line 97 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

@@ -5,7 +5,7 @@ void yyerror(char *);
 %}
 
 %%
-(0|[1-9][0-9]*)(\.[0-9]+)?  {printf("debug:识别到数字%s\n",yytext);sscanf(yytext,"%lf",&yylval.d_num); return NUM;}
+(0|[1-9][0-9]*)(\.[0-9]+)?  {sscanf(yytext,"%lf",&yylval.d_num); return NUM;}
 "\+"							return ADD;
 "\-"							return SUB;
 "\*"							return MUL;
@@ -16,5 +16,6 @@ void yyerror(char *);
 \)                          return RP;
 &&                          return AND;
 \|\|                        return OR;
+!                           return NOT;
 .                           {fprintf(stderr,"无法识别的字符: %c:0x%x\n",*yytext,*yytext); exit(EXIT_FAILURE);}
 %%
