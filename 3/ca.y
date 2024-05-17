@@ -10,7 +10,7 @@ void yyerror(char *);
 }
 %token ADD SUB MUL DIV CR LP RP AND OR NOT
 %token <d_num> NUM
-%type  <d_num> expression term single logic0 logic2 logic3 logic1
+%type  <d_num> expression term single logic1 logic2 logic3
 
 %%
        line_list: line
@@ -29,13 +29,10 @@ void yyerror(char *);
                 | logic2 AND logic1 {$$=($1&&$3);}
                 ;
 
-          logic1:logic0
-                | NOT logic0 {$$=!$2;}
+          logic1:expression
+                | NOT expression {$$=!$2;}
                 ;
-
-          logic0:expression
-                | LP logic3 RP {$$=$2;}
-                ;                
+               
 
       expression: term 
                 | expression ADD term   {$$=$1+$3;}
@@ -50,7 +47,7 @@ void yyerror(char *);
 		  single: NUM                   {$$=$1;}
                 | SUB single            {$$=-$2;}   // 负号
                 | ADD single            {$$=$2;}
-                | LP expression RP      {$$=$2;}    // 括号
+                | LP logic3 RP      {$$=$2;}    // 括号
 				;
 %%
 void yyerror(char *str){
