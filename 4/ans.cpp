@@ -13,9 +13,10 @@
 #define MAX 507
 #define DEBUG
 
-/*计算机2102 李芝塬 zhiyuanli0122@outlook.com
+/*计算机2102 李芝塬 2216113163 zhiyuanli0122@outlook.com 
  * 参考的教材：《编译原理 第三版》陈火旺 9787118022070
  * 使用的命名结合了slr1-add.cpp与教材
+ * 参考链接：https://blog.csdn.net/GJ_007/article/details/79587693
  */
 
 using namespace std;
@@ -93,13 +94,13 @@ struct Content
         : type(a), num(b) {}
 };
 
-vector<WF> wf;                   // 记录所有的产生式，每个产生式都有一个序号。顺序就是用户输入的顺序
-map<string, vector<int>> dic;    // 记录每个左部对应的项目的编号
-map<string, vector<int>> VN_set; // key(string)是产生式左侧是字符，value是这个字符对应的原始的产生式的编号。一个符号可能有多个产生式，所以需要用vector记录所有的产生式的编号
-map<string, bool> vis;
-char start; // 开始符号S
+vector<WF> wf;                   // 记录所有的文法，每个文法都有一个序号。顺序就是用户输入的顺序
+map<string, vector<int>> dic;    // 记录每个左部对应的全部项目的编号。编号就是这个项目在items中的下标
+map<string, vector<int>> VN_set; // key(string)是文法左侧是字符，value是这个字符对应的原始的文法的编号。一个符号可能有多个文法，所以需要用vector记录所有的文法的编号。编号在wf作为下标中使用
+map<string, bool> vis;           // 记录是否已经被遍历过
+char start;                      // 开始符号S
 vector<Closure> collection;
-vector<WF> items; // 记录所有的项目，即加入了'.'的产生式。
+vector<WF> items; // 记录所有的项目，即加入了'.'的文法。
 char CH = '.';    // 使用
 int go[MAX][MAX];
 int to[MAX]; // to[i]记录从项目i-1到项目i的弧
@@ -107,13 +108,13 @@ vector<char> V;
 bool used[MAX];
 Content action[MAX][MAX];
 int Goto[MAX][MAX];
-map<string, set<char>> first;
+map<string, set<char>> first; // first[X] 就是 FIRST(X)的值
 map<string, set<char>> follow;
 
-// 在读取所有的产生式之后统一生成项目（即圆点在不同位置的产生式）
+// 在读取所有的文法之后统一生成项目（即圆点在不同位置的文法）
 void make_item()
 {
-    // ??? WTF
+    // ??? WTF 这里原作者写错了
     // memset(to, -1, sizeof(-1));
     memset(to, -1, sizeof(to));
     for (int i = 0; i < wf.size(); i++)
@@ -138,18 +139,19 @@ void make_item()
 #endif
 }
 
+// 遍历求符号X的FIRST，结果存储在map first中
 void dfs(const string &x)
 {
     if (vis[x])
         return;
     vis[x] = 1;
-    vector<int> &id = VN_set[x];
-    for (int i = 0; i < id.size(); i++)
+    vector<int> &id = VN_set[x]; // 获取符号X的所有文法的编号
+    for (int i = 0; i < id.size(); i++) // 每次循环都只分析一条文法
     {
         string &left = wf[id[i]].left;
         string &right = wf[id[i]].right;
         for (int j = 0; j < right.length(); j++)
-            if (isupper(right[j]))
+            if (isupper(right[j]))  // 大写字母是非终结项， 小写字母与符号是终结项
             {
                 dfs(right.substr(j, 1));
                 set<char> &temp = first[right.substr(j, 1)];
@@ -166,37 +168,48 @@ void dfs(const string &x)
             }
             else
             {
+                // 符合规则1
                 first[left].insert(right[j]);
                 break;
             }
     }
 }
 
+/*求FIRST()函数
+原理：教材P78
+对于FIRST(X):
+1. X in VT: FIRST(X)={X}
+2. x in VN, and X->a... : 把a加入FIRST(X)中。若存在X->e，则加入e
+3. X->Y and Y in VN: 加入FIRST(Y)到FIRST(X)中。 对X->Y1 Y2 ... Yi ... Yk，检查e
+*/
 void make_first()
 {
     vis.clear();
     map<string, vector<int>>::iterator it2 = dic.begin();
     for (; it2 != dic.end(); it2++)
-        if (vis[it2->first])
+    {
+        if (vis[it2->first]) // it2->first是项目的左部。 vis[]表示这个项目是否被检查过
             continue;
         else
             dfs(it2->first);
+    }
 #ifdef DEBUG
-    //  puts ("****************FIRST集***************************");
+    puts("****************FIRST集***************************");
     map<string, set<char>>::iterator it = first.begin();
     for (; it != first.end(); it++)
     {
-        // printf ( "FIRST(%s)={" , it->first.c_str() );
+        printf("FIRST(%s)={", it->first.c_str());
         set<char> &temp = it->second;
         set<char>::iterator it1 = temp.begin();
         bool flag = false;
         for (; it1 != temp.end(); it1++)
         {
-            if (flag) // printf ( "," );
-                // printf ( "%c" , *it1 );
-                flag = true;
+            if (flag)
+                printf(",");
+            printf("%c", *it1);
+            flag = true;
         }
-        // puts ("}" );
+        puts("}");
     }
 #endif
 }
@@ -734,7 +747,7 @@ int main()
         {
             cin >> s;
             int len = strlen(s);
-            int j; // 记录产生式中箭头的位置
+            int j; // 记录文法中箭头的位置
             for (j = 0; j < len; j++)
                 if (s[j] == '-')
                     break;
@@ -747,8 +760,8 @@ int main()
 #endif
         }
         make_item();
-        // make_first();
-        // make_follow();
+        make_first();
+        make_follow();
         // make_set();
         // make_V();
         // make_go();
