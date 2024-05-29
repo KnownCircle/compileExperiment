@@ -99,12 +99,12 @@ map<string, vector<int>> dic;    // 记录每个左部对应的全部项目的�
 map<string, vector<int>> VN_set; // key(string)是文法左侧是字符，value是这个字符对应的原始的文法的编号。一个符号可能有多个文法，所以需要用vector记录所有的文法的编号。编号在wf作为下标中使用
 map<string, bool> vis;           // 记录是否已经被遍历过
 char start;                      // 开始符号S
-vector<Closure> collection;
+vector<Closure> collection;      // 记录所有的闭包，每个元素是一个闭包
 vector<WF> items; // 记录所有的项目，即加入了'.'的文法。
 char CH = '.';    // 使用
 int go[MAX][MAX];
 int to[MAX]; // to[i]记录从项目i-1到项目i的弧
-vector<char> V;
+vector<char> V;             // 记录文法中包含的字符的合集
 bool used[MAX];
 Content action[MAX][MAX];
 int Goto[MAX][MAX];
@@ -234,6 +234,12 @@ bool _check(const vector<int> &id, const string str)
     return false;
 }
 
+/*求FOLLOW()函数
+原理：书P79
+1. 对于开始符号，加入#
+2. 若A-> αBβ是一个产生式，则FOLLOW(B)中加入FIRST(β)\{ε}
+3. 若A->αB是产生式，或A->αBβ是产生式而β-->ε，则把FOLLOW(A)加入FOLLOW(B)中
+*/
 void make_follow()
 {
     while (true)
@@ -318,11 +324,11 @@ void make_follow()
 #endif
 }
 
+// 划分闭包
 void make_set()
 {
     bool has[MAX];
     for (int i = 0; i < items.size(); i++)
-        // if ( items[i].left[0] == 'S' && items[i].right[0] == CH )
         if (items[i].left[0] == start && items[i].right[0] == CH)
         {
             Closure temp;
@@ -429,21 +435,22 @@ void make_set()
                 if (collection[i] == collection[j])
                     collection.erase(collection.begin() + j);
     }
-    /*#ifdef DEBUG
-        puts ("-------------CLOSURE---------------------");
-        stringstream sin;
-        for ( int i = 0 ; i < collection.size() ; i++ )
-        {
-            sin.clear();
-            string out;
-            sin <<"closure-I" << i;
-            sin >> out;
-            collection[i].print ( out );
-        }
-        puts("");
-    #endif */
+#ifdef DEBUG
+    puts ("-------------CLOSURE---------------------");
+    stringstream sin;
+    for ( int i = 0 ; i < collection.size() ; i++ )
+    {
+        sin.clear();
+        string out;
+        sin <<"closure-I" << i;
+        sin >> out;
+        collection[i].print ( out );
+    }
+    puts("");
+#endif 
 }
 
+// 记录所有产生式中的所有符号，保存在V中
 void make_V()
 {
     memset(used, 0, sizeof(used));
@@ -472,7 +479,7 @@ void make_V()
 
 void make_cmp(vector<WF> &cmp1, int i, char ch)
 {
-    for (int j = 0; j < collection[i].element.size(); j++)
+    for (int j = 0; j < collection[i].element.size(); j++) // collection[i].element就是这个闭包中的所有项目构成的vector
     {
         string str = collection[i].element[j].right;
         int k;
@@ -488,7 +495,7 @@ void make_cmp(vector<WF> &cmp1, int i, char ch)
     }
     sort(cmp1.begin(), cmp1.end());
 }
-// follow吧
+
 void make_go()
 {
     memset(go, -1, sizeof(go));
@@ -501,7 +508,6 @@ void make_go()
         {
             vector<WF> cmp1;
             make_cmp(cmp1, i, ch);
-            // cout << cmp1.size() << endl;
             if (cmp1.size() == 0)
                 continue;
             for (int j = 0; j < m; j++)
@@ -518,37 +524,34 @@ void make_go()
                         cmp2.push_back(WF(collection[j].element[k].left, str, -1, -1));
                 }
                 sort(cmp2.begin(), cmp2.end());
-                // cout << cmp2.size() << endl;
                 bool flag = true;
                 if (cmp2.size() != cmp1.size())
                     continue;
-                // cout << cmp1.size() << endl;
                 for (int k = 0; k < cmp1.size(); k++)
                     if (cmp1[k] == cmp2[k])
                         continue;
                     else
                         flag = false;
-                // cout << "out " << endl;
                 if (flag)
                     go[i][ch] = j;
             }
         }
     }
-    // #ifdef DEBUG
-    //     puts ("---------------EDGE----------------------");
-    //     stringstream sin;
-    //     string out;
-    //     for ( int i = 0 ; i < m ; i++ )
-    //         for ( int j = 0 ; j < m ; j++ )
-    //             for ( int k = 0 ; k < MAX ; k++ )
-    //                 if ( go[i][k] == j )
-    //                 {
-    //                     sin.clear();
-    //                     sin << "I" << i << "--" <<(char)(k)<<"--I"<<j;
-    //                     sin >> out;
-    //                     printf ( "%s\n" , out.c_str() );
-    //                 }
-    // #endif
+#ifdef DEBUG
+    puts ("---------------EDGE----------------------");
+    stringstream sin;
+    string out;
+    for ( int i = 0 ; i < m ; i++ )
+        for ( int j = 0 ; j < m ; j++ )
+            for ( int k = 0 ; k < MAX ; k++ )
+                if ( go[i][k] == j )
+                {
+                    sin.clear();
+                    sin << "I" << i << "--" <<(char)(k)<<"--I"<<j;
+                    sin >> out;
+                    printf ( "%s\n" , out.c_str() );     
+                }   
+#endif
 }
 
 void make_table()
@@ -672,7 +675,7 @@ string get_stk(vector<T> stk)
 string get_shift(WF &temp)
 {
     stringstream sin;
-    sin << "规约(" << temp.left << "->" << temp.right << ")";
+    sin << "reduce(" << temp.left << "->" << temp.right << ")";
     string out;
     sin >> out;
     return out;
@@ -680,12 +683,7 @@ string get_shift(WF &temp)
 
 void analyse(string src)
 {
-    print(" 步骤 ", "符号栈", "输入串", "操作", "状态栈  ", "ACTION", "GOTO");
-    string filename;
-    filename = "analyse.txt";
-    ofstream f(filename, ios::out);
-    f << " 步骤 " << '\t' << '\t' << "符号栈" << '\t' << '\t' << "输入串" << '\t' << '\t' << "操作" << '\t' << '\t' << "状态栈  " << '\t' << '\t' << "ACTION" << '\t' << '\t' << "GOTO" << endl;
-
+    print ( "steps","op-stack" ,"input","operation","state-stack" , "ACTION" , "GOTO" );
     vector<char> op_stack;
     vector<int> st_stack;
     src += "#";
@@ -697,11 +695,9 @@ void analyse(string src)
         char u = src[i];
         int top = st_stack[st_stack.size() - 1];
         Content &act = action[top][u];
-        // cout << "YES : " << i << " " << u << " " << top << " " << act.type << endl;
         if (act.type == 0)
         {
-            print(get_steps(steps++), get_stk(op_stack), src.substr(i), "移近", get_stk(st_stack), act.out, "");
-            f << get_steps(steps) << '\t' << '\t' << get_stk(op_stack) << '\t' << '\t' << src.substr(i) << '\t' << '\t' << "移近" << '\t' << '\t' << get_stk(st_stack) << '\t' << '\t' << act.out << '\t' << '\t' << "" << endl;
+            print(get_steps(steps++), get_stk(op_stack), src.substr(i), "shift", get_stk(st_stack), act.out, "");
             op_stack.push_back(u);
             st_stack.push_back(act.num);
         }
@@ -710,9 +706,7 @@ void analyse(string src)
             WF &tt = wf[act.num];
             int y = st_stack[st_stack.size() - tt.right.length() - 1];
             int x = Goto[y][tt.left[0]];
-            // cout << y << " " << tt.left[0] << " " << x << endl;
             print(get_steps(steps++), get_stk(op_stack), src.substr(i), get_shift(tt), get_stk(st_stack), act.out, get_steps(x));
-            f << get_steps(steps) << '\t' << '\t' << get_stk(op_stack) << '\t' << '\t' << src.substr(i) << '\t' << '\t' << get_shift(tt) << '\t' << '\t' << get_stk(st_stack) << '\t' << '\t' << act.out << '\t' << '\t' << get_steps(x) << endl;
             for (int j = 0; j < tt.right.length(); j++)
             {
                 st_stack.pop_back();
@@ -724,9 +718,7 @@ void analyse(string src)
         }
         else if (act.type == 2)
         {
-            print(get_steps(steps++), get_stk(op_stack), src.substr(i), "接受", get_stk(st_stack), act.out, "");
-            f << get_steps(steps) << '\t' << '\t' << get_stk(op_stack) << '\t' << '\t' << src.substr(i) << '\t' << '\t' << "接受" << '\t' << '\t' << get_stk(st_stack) << '\t' << '\t' << act.out << '\t' << '\t' << "" << endl;
-            // i--;
+            print(get_steps(steps++), get_stk(op_stack), src.substr(i), "accept", get_stk(st_stack), act.out, "");
         }
         else
             continue;
@@ -753,23 +745,18 @@ int main()
                     break;
             s[j] = 0;
             wf.push_back(WF(s, s + j + 2, -1, -1));
-#ifdef DEBUG
-            cout << "-----------------------debug-----------------------\n";
-            cout << "读取到的输入内容为：\n";
-            wf[wf.size() - 1].print();
-#endif
         }
         make_item();
         make_first();
         make_follow();
-        // make_set();
-        // make_V();
-        // make_go();
-        // make_table();
-        // string s1;
-        // cout << "输入待分析的字符串：\n";
-        // cin >> s1;
-        // analyse(s1);
+        make_set();
+        make_V();
+        make_go();
+        make_table();
+        string s1;
+        cout << "输入待分析的字符串：\n";
+        cin >> s1;
+        analyse(s1);
     }
     else
     {
