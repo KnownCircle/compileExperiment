@@ -84,6 +84,10 @@ public:
     }
 };
 
+/*每个content就是一个GOTO表格的结构，代表了操作与值
+type 0,1,2代表shift, reduce, accept
+num是具体的值 
+*/ 
 struct Content
 {
     int type;
@@ -554,42 +558,45 @@ void make_go()
 #endif
 }
 
+/* 完成GOTO表
+原理：书P112
+1. if A->.αaβ属于Ik且GO(Ik,a)=Ij，a为终结符，则ACTION[k,a]=sj
+2. if A->α.属于Ik,则对任何终结符a, a in FOLLOW(A)，则ACTION[k,a]=rj
+3. if S'->S.属于Ik,则ACTION[k,#]为accept
+4. if GO(Ik,A)=Ij,A为非终结符， 则GOTO[k,A]=j;
+5. 其余格子为错误
+*/
 void make_table()
 {
     memset(Goto, -1, sizeof(Goto));
-
-    // write s to the table
-    for (int i = 0; i < collection.size(); i++)
-        for (int j = 0; j < V.size(); j++)
+    // sj
+    for (int row = 0; row < collection.size(); row++)
+        for (int col = 0; col < V.size(); col++)
         {
-            char ch = V[j];
-            int x = go[i][ch];
+            char ch = V[col];
+            int x = go[row][ch];
             if (x == -1)
                 continue;
             if (!isupper(ch))
-                action[i][ch] = Content(0, x);
+                action[row][ch] = Content(0, x);
             else
-                Goto[i][ch] = x;
+                Goto[row][ch] = x;
         }
-    // write r and acc to the table
-    for (int i = 0; i < collection.size(); i++)
-        for (int j = 0; j < collection[i].element.size(); j++)
+    // rj and accept
+    for (int row = 0; row < collection.size(); row++) 
+        for (int col = 0; col < collection[row].element.size(); col++) 
         {
-            WF &tt = collection[i].element[j];
-            if (tt.right[tt.right.length() - 1] == CH)
+            WF &t = collection[row].element[col];
+            if (t.right[t.right.length() - 1] == CH) // 匹配选项2和3
             {
-                // if ( tt.left[0] == 'S' )
-                if (tt.left[0] == start)
-                    action[i]['#'] = Content(2, -1);
+                if (t.left[0] == start) // 选项3
+                    action[row]['#'] = Content(2, -1);
                 else
                     for (int k = 0; k < V.size(); k++)
                     {
-                        int y = V[k];
-
-                        if (!follow[tt.left].count(V[k]))
+                        if (!follow[t.left].count(V[k]))
                             continue;
-
-                        action[i][y] = Content(1, tt.back);
+                        action[row][V[k]] = Content(1, t.back);
                     }
             }
         }
@@ -607,9 +614,9 @@ void make_table()
     for (int i = 0; i < collection.size(); i++)
     {
         printf("%5d%5s", i, "|");
-        for (int j = 0; j < V.size(); j++)
+        for (int col = 0; col < V.size(); col++)
         {
-            char ch = V[j];
+            char ch = V[col];
             if (isupper(ch))
             {
                 if (Goto[i][ch] == -1)

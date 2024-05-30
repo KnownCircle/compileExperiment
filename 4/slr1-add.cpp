@@ -10,7 +10,7 @@
 #include <set>
 #include <sstream>
 #define MAX 507
-#define DEBUG
+// #define DEBUG
 /*Author : byj*/
 using namespace std;
 
@@ -84,7 +84,7 @@ vector<WF> wf;
 map<string,vector<int> > dic;
 map<string,vector<int> > VN_set;
 map<string,bool>  vis;
-string start = "S";
+char start = 'S';
 vector<Closure> collection;
 vector<WF> items;
 char CH = '$';
@@ -556,6 +556,96 @@ void make_go ( )
 #endif
 }
 
+void make_table ( )
+{
+    memset ( Goto , -1 , sizeof ( Goto ) );
+  
+    //write s to the table 
+    for( int i = 0 ; i < collection.size() ; i++ )
+        for ( int j = 0 ; j < V.size() ; j++ )
+        {
+            char ch = V[j];
+            int x = go[i][ch];
+            if ( x == -1 ) continue;
+            if ( !isupper(ch) )
+                action[i][ch] = Content ( 0 , x );
+            else 
+                Goto[i][ch] = x;
+        }
+    //write r and acc to the table 
+    for ( int i = 0 ; i < collection.size() ; i++ )
+        for ( int j = 0 ; j < collection[i].element.size() ; j++ )
+        {
+            WF& tt = collection[i].element[j];
+            if ( tt.right[tt.right.length()-1] == CH )
+            {
+               //if ( tt.left[0] == 'S' )
+ if (tt.left[0] == start)
+                    action[i]['#'] = Content ( 2 , -1 );
+                else 
+                    for ( int k = 0 ; k < V.size() ; k++ )
+                    {
+                        int y = V[k];
+                        
+                        if ( !follow[tt.left].count( V[k] ) ) continue;
+                      
+                        action[i][y] = Content ( 1, tt.back );
+                    }
+            }
+        }
+#ifdef DEBUG
+    //puts ( "------------------------------------------LR(0)分析表--------------------------------------------------------" );
+ cout << "_________________________LR(0)分析表________________________" << endl;
+ printf ( "%10s%5c%5s" , "|" , V[0]  , "|");
+    for ( int i = 1 ; i < V.size() ; i++ )
+        printf ( "%5c%5s" , V[i] , "|" );
+    puts ("");
+    for ( int i = 0 ; i < (V.size()+1)*10 ; i++ )
+        printf ( "_" );
+    puts("");
+    stringstream sin;
+    for ( int i = 0 ; i < collection.size() ; i++ )
+    {
+        printf ( "%5d%5s" , i , "|" );
+        for ( int j = 0 ; j < V.size() ; j++ )
+        {
+            char ch = V[j];
+            if ( isupper(ch) )
+            {
+                if ( Goto[i][ch] == -1 )
+                    printf ( "%10s" , "|" );
+                else 
+                    printf ( "%5d%5s" , Goto[i][ch] , "|" );
+            }
+            else
+            {
+                sin.clear();
+                if ( action[i][ch].type == -1 ) 
+                    printf ( "%10s" , "|" ); 
+                else 
+                {
+                    Content& temp = action[i][ch];
+                    if ( temp.type == 0 ) 
+                        sin << "S";
+                    if ( temp.type == 1 ) 
+                        sin << "R";
+                    if ( temp.type == 2 )
+                        sin << "acc";
+                    if ( temp.num != -1 )
+                        sin << temp.num;
+                    sin >> temp.out;
+                    printf ( "%7s%3s" , temp.out.c_str() , "|" );
+                }
+            }
+        }
+        puts ("");
+    }
+    for ( int i = 0 ; i < (V.size()+1)*10 ; i++ )
+        printf ( "_" );
+    puts("");
+#endif
+}
+
 
 void print ( string s1 , string s2 , string s3 , string s4 , string s5 , string s6 , string s7 )
 {
@@ -594,6 +684,7 @@ string get_shift ( WF& temp )
 
 void analyse ( string src )
 {
+    cout<<"进入analyse\nsrc="<<src<<endl; 
     print ( "steps","op-stack" ,"input","operation","state-stack" , "ACTION" , "GOTO" );
     vector<char> op_stack;
     vector<int> st_stack;

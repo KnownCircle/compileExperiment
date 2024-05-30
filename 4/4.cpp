@@ -40,20 +40,20 @@ public:
         id = y;
     }
     // 重载<运算符
-    bool operator<(const WF &a) const
+    bool operator < (const WF &a) const
     {
         if (left == a.left)
             return right < a.right;
         return left < a.left;
     }
     // 重载==
-    bool operator==(const WF &a) const
+    bool operator == (const WF &a) const
     {
         return (left == a.left) && (right == a.right);
     }
     void print()
     {
-        ///*printf ( "%s->%s\n" , left.c_str() , right.c_str() );*/
+        printf ( "%s->%s\n" , left.c_str() , right.c_str() );
     }
 };
 // 闭包类
@@ -63,9 +63,9 @@ public:
     vector<WF> element;
     void print(string str)
     {
-        /*   printf ( "%-15s%-15s\n" , "" , str.c_str());
+           printf ( "%-15s%-15s\n" , "" , str.c_str());
            for ( int i = 0 ; i < element.size() ; i++ )
-               element[i].print();*/
+               element[i].print();
     }
     // 重载==
     bool operator==(const Closure &a) const
@@ -95,9 +95,7 @@ vector<WF> wf;
 map<string, vector<int>> dic;
 map<string, vector<int>> VN_set;
 map<string, bool> vis;
-
-// 定义文法的开始字符
-char start;
+char start; // 开始符号S
 void start_zm()
 {
     char start_s;
