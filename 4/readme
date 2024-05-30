@@ -1,0 +1,14 @@
+说明：
+slr1-add.cpp和slrs.cpp是老师给的实例代码。
+本次实验需要在示例代码的基础上添加make_table()相关内容
+实验内容是二选一：修改slr1-add.cpp或slr2.cpp 
+我做的内容是修改slr1-add.cpp 
+现在的这个仓库中， slr1-add copy.cpp是原始的slr1-add.cpp， 现在存在的slr1-add.cpp是经过我胡乱修改过的，没有参考价值
+4.cpp是从网上下载的答案，来源：https://blog.csdn.net/GJ_007/article/details/79587693
+ans.cpp是我参考了答案后写的代码，注释比较详尽
+
+所以总结一下：
+slr1-add.cpp, slr1-add copy.cpp, slrs.cpp是原始的代码
+4.cpp是网上找来的标准答案
+ans.cpp是我写的、要提交的结果
+run.sh与input.txt是测试程序时的辅助
