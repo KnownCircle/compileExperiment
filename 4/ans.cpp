@@ -13,11 +13,11 @@
 #define MAX 507
 #define DEBUG
 
-/*计算机2102 李芝塬 2216113163 zhiyuanli0122@outlook.com 
+/*计算机2102 李芝塬 2216113163 zhiyuanli0122@outlook.com
  * 参考的教材：《编译原理 第三版》陈火旺 9787118022070
  * 使用的命名结合了slr1-add.cpp与教材
  * 参考链接：https://blog.csdn.net/GJ_007/article/details/79587693
- */
+*/
 
 using namespace std;
 
@@ -26,8 +26,8 @@ class WF
 {
 public:
     string left, right; // 产生式左边和右边
-    int back;
-    int id; // 项目集序号
+    int back;           // 记录当前产生式在所有产生式中的序号，作为在make_table的第2条中的j
+    int id;             // 项目集序号
     WF(char s1[], char s2[], int x, int y)
     {
         left = s1;
@@ -86,8 +86,8 @@ public:
 
 /*每个content就是一个GOTO表格的结构，代表了操作与值
 type 0,1,2代表shift, reduce, accept
-num是具体的值 
-*/ 
+num是具体的值
+*/
 struct Content
 {
     int type;
@@ -104,11 +104,11 @@ map<string, vector<int>> VN_set; // key(string)是文法左侧是字符，value�
 map<string, bool> vis;           // 记录是否已经被遍历过
 char start;                      // 开始符号S
 vector<Closure> collection;      // 记录所有的闭包，每个元素是一个闭包
-vector<WF> items; // 记录所有的项目，即加入了'.'的文法。
-char CH = '.';    // 使用
+vector<WF> items;                // 记录所有的项目，即加入了'.'的文法。
+char CH = '.';                   // 使用
 int go[MAX][MAX];
-int to[MAX]; // to[i]记录从项目i-1到项目i的弧
-vector<char> V;             // 记录文法中包含的字符的合集
+int to[MAX];    // to[i]记录从项目i-1到项目i的弧
+vector<char> V; // 记录文法中包含的字符的合集
 bool used[MAX];
 Content action[MAX][MAX];
 int Goto[MAX][MAX];
@@ -149,13 +149,13 @@ void dfs(const string &x)
     if (vis[x])
         return;
     vis[x] = 1;
-    vector<int> &id = VN_set[x]; // 获取符号X的所有文法的编号
+    vector<int> &id = VN_set[x];        // 获取符号X的所有文法的编号
     for (int i = 0; i < id.size(); i++) // 每次循环都只分析一条文法
     {
         string &left = wf[id[i]].left;
         string &right = wf[id[i]].right;
         for (int j = 0; j < right.length(); j++)
-            if (isupper(right[j]))  // 大写字母是非终结项， 小写字母与符号是终结项
+            if (isupper(right[j])) // 大写字母是非终结项， 小写字母与符号是终结项
             {
                 dfs(right.substr(j, 1));
                 set<char> &temp = first[right.substr(j, 1)];
@@ -328,7 +328,7 @@ void make_follow()
 #endif
 }
 
-// 划分闭包
+// 划分闭包CLOSURE
 void make_set()
 {
     bool has[MAX];
@@ -440,18 +440,18 @@ void make_set()
                     collection.erase(collection.begin() + j);
     }
 #ifdef DEBUG
-    puts ("-------------CLOSURE---------------------");
+    puts("-------------CLOSURE---------------------");
     stringstream sin;
-    for ( int i = 0 ; i < collection.size() ; i++ )
+    for (int i = 0; i < collection.size(); i++)
     {
         sin.clear();
         string out;
-        sin <<"closure-I" << i;
+        sin << "closure-I" << i;
         sin >> out;
-        collection[i].print ( out );
+        collection[i].print(out);
     }
     puts("");
-#endif 
+#endif
 }
 
 // 记录所有产生式中的所有符号，保存在V中
@@ -542,66 +542,106 @@ void make_go()
         }
     }
 #ifdef DEBUG
-    puts ("---------------EDGE----------------------");
+    puts("---------------EDGE----------------------");
     stringstream sin;
     string out;
-    for ( int i = 0 ; i < m ; i++ )
-        for ( int j = 0 ; j < m ; j++ )
-            for ( int k = 0 ; k < MAX ; k++ )
-                if ( go[i][k] == j )
+    for (int i = 0; i < m; i++)
+        for (int j = 0; j < m; j++)
+            for (int k = 0; k < MAX; k++)
+                if (go[i][k] == j)
                 {
                     sin.clear();
-                    sin << "I" << i << "--" <<(char)(k)<<"--I"<<j;
+                    sin << "I" << i << "--" << (char)(k) << "--I" << j;
                     sin >> out;
-                    printf ( "%s\n" , out.c_str() );     
-                }   
+                    printf("%s\n", out.c_str());
+                }
 #endif
 }
 
-/* 完成GOTO表
+/* 完成action表和GOTO表
 原理：书P112
-1. if A->.αaβ属于Ik且GO(Ik,a)=Ij，a为终结符，则ACTION[k,a]=sj
+1. if A->α.aβ属于Ik且GO(Ik,a)=Ij，a为终结符，则ACTION[k,a]=sj
 2. if A->α.属于Ik,则对任何终结符a, a in FOLLOW(A)，则ACTION[k,a]=rj
 3. if S'->S.属于Ik,则ACTION[k,#]为accept
 4. if GO(Ik,A)=Ij,A为非终结符， 则GOTO[k,A]=j;
 5. 其余格子为错误
+
+实现方式：
+任一项目要么属于2，要么属于1（即圆点要么在最后，要么不在最后）
+
+对于任意一个项目，
 */
 void make_table()
 {
     memset(Goto, -1, sizeof(Goto));
-    // sj
-    for (int row = 0; row < collection.size(); row++)
-        for (int col = 0; col < V.size(); col++)
+    // sj 对应条目1和4
+    //     | -- action -------| -----GOTO---- |
+    //     | i   | +    |*    | E   |T   |F   |
+    //  I0 |
+    //  I1 |
+    // ...
+    for (int k = 0; k < collection.size(); k++)
+    {
+        for (int i = 0; i < collection[k].element.size(); i++)
         {
-            char ch = V[col];
-            int x = go[row][ch];
-            if (x == -1)
-                continue;
-            if (!isupper(ch))
-                action[row][ch] = Content(0, x);
-            else
-                Goto[row][ch] = x;
-        }
-    // rj and accept
-    for (int row = 0; row < collection.size(); row++) 
-        for (int col = 0; col < collection[row].element.size(); col++) 
-        {
-            WF &t = collection[row].element[col];
-            if (t.right[t.right.length() - 1] == CH) // 匹配选项2和3
+            WF &t = collection[k].element[i];        // 闭包row的项目col
+            if (t.right[t.right.length() - 1] == CH) // 项目最右侧是'.'，即匹配选项2和3
             {
-                if (t.left[0] == start) // 选项3
-                    action[row]['#'] = Content(2, -1);
-                else
-                    for (int k = 0; k < V.size(); k++)
+                // 此时t是一个满足2或3的项目
+                if (t.left[0] == start) // 选项3，即匹配成功
+                    action[k]['#'] = Content(2, -1);
+                else // 满足选项2，需要按照产生式j进行归约
+                    for (auto col = V.begin(); col != V.end(); col++)
                     {
-                        if (!follow[t.left].count(V[k]))
+                        if (0 == follow[t.left].count(*col))
                             continue;
-                        action[row][V[k]] = Content(1, t.back);
+                        else
+                        {
+                            int j = t.back;
+                            action[k][*col] = Content(1, j);
+                        }
                     }
             }
+            else // 圆点不在最右，即可能匹配选项1和4
+            {
+                int index; // 圆点的位置
+                for (index = 0; index < t.right.length(); index++)
+                {
+                    if (t.right[index] == CH)
+                    {
+                        break;
+                    }
+                }
+                if (index >= t.right.length() - 1)
+                {
+                    exit(EXIT_FAILURE);
+                }
+                else
+                {
+                    for (auto col = V.begin(); col != V.end(); col++)
+                    {
+                        char a = *col;
+                        if (t.right[index + 1] == a)
+                        {
+                            int j = go[k][a];
+                            if (j != -1)
+                            {
+                                if (!isupper(a))
+                                    action[k][a] = Content(0, j); // action[Ik][a]=sj
+                                else
+                                    Goto[k][a] = j;
+                            }
+                            else
+                            {
+                                continue;
+                            }
+                        }
+                    }
+                }
+            }
         }
+    }
 #ifdef DEBUG
-    // puts ( "------------------------------------------LR(0)分析表--------------------------------------------------------" );
     cout << "_________________________LR(0)分析表________________________" << endl;
     printf("%10s%5c%5s", "|", V[0], "|");
     for (int i = 1; i < V.size(); i++)
@@ -690,7 +730,7 @@ string get_shift(WF &temp)
 
 void analyse(string src)
 {
-    print ( "steps","op-stack" ,"input","operation","state-stack" , "ACTION" , "GOTO" );
+    print("steps", "op-stack", "input", "operation", "state-stack", "ACTION", "GOTO");
     vector<char> op_stack;
     vector<int> st_stack;
     src += "#";
