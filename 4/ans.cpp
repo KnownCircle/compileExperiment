@@ -101,14 +101,14 @@ struct Content
 vector<WF> wf;                   // 记录所有的文法，每个文法都有一个序号。顺序就是用户输入的顺序
 map<string, vector<int>> dic;    // 记录每个左部对应的全部项目的编号。编号就是这个项目在items中的下标
 map<string, vector<int>> VN_set; // key(string)是文法左侧是字符，value是这个字符对应的原始的文法的编号。一个符号可能有多个文法，所以需要用vector记录所有的文法的编号。编号在wf作为下标中使用
-map<string, bool> vis;           // 记录是否已经被遍历过
-char start;                      // 开始符号S
+map<string, bool> vis;           // 在dfs中记录是否已经被遍历过
+char start;                      // 文法的开始符号S
 vector<Closure> collection;      // 记录所有的闭包，每个元素是一个闭包
 vector<WF> items;                // 记录所有的项目，即加入了'.'的文法。
-char CH = '.';                   // 使用
+char CH = '.';                   
 int go[MAX][MAX];
 int to[MAX];    // to[i]记录从项目i-1到项目i的弧
-vector<char> V; // 记录文法中包含的字符的合集
+vector<char> V; // 记录文法中包含的字符的合集，包括终结符和非终结符
 bool used[MAX];
 Content action[MAX][MAX];
 int Goto[MAX][MAX];
@@ -568,8 +568,6 @@ void make_go()
 
 实现方式：
 任一项目要么属于2，要么属于1（即圆点要么在最后，要么不在最后）
-
-对于任意一个项目，
 */
 void make_table()
 {
@@ -643,7 +641,7 @@ void make_table()
     }
 #ifdef DEBUG
     cout << "_________________________LR(0)分析表________________________" << endl;
-    printf("%10s%5c%5s", "|", V[0], "|");
+    printf("%8s%5c%5s", "|", V[0], "|");
     for (int i = 1; i < V.size(); i++)
         printf("%5c%5s", V[i], "|");
     puts("");
@@ -660,15 +658,15 @@ void make_table()
             if (isupper(ch))
             {
                 if (Goto[i][ch] == -1)
-                    printf("%10s", "|");
+                    printf("%8s", "|");
                 else
-                    printf("%5d%5s", Goto[i][ch], "|");
+                    printf("%5d%3s", Goto[i][ch], "|");
             }
             else
             {
                 sin.clear();
                 if (action[i][ch].type == -1)
-                    printf("%10s", "|");
+                    printf("%8s", "|");
                 else
                 {
                     Content &temp = action[i][ch];
@@ -681,7 +679,7 @@ void make_table()
                     if (temp.num != -1)
                         sin << temp.num;
                     sin >> temp.out;
-                    printf("%7s%3s", temp.out.c_str(), "|");
+                    printf("%6s%1s", temp.out.c_str(), "|");
                 }
             }
         }
