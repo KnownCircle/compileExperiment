@@ -787,9 +787,7 @@ int main()
 {
     int n;
     char s[MAX];
-    cout << "输入开始符号：\n";
     cin >> start;
-    cout << "输入文法个数和文法：";
 
     if (scanf("%d", &n) > 0 && n > 0)
     {
@@ -812,7 +810,6 @@ int main()
         make_go();
         make_table();
         string s1;
-        cout << "输入待分析的字符串：\n";
         cin >> s1;
         analyse(s1);
     }

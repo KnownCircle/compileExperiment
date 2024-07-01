@@ -1,5 +1,4 @@
-输入开始符号：
-输入文法个数和文法：-------------------------项目表-------------------------
+-------------------------项目表-------------------------
 S->.E back:0 id:0
 S->E. back:0 id:1
 E->.E+T back:1 id:2
@@ -152,30 +151,31 @@ ________________________________________________________________________________
    13    |       |    R1|   S11|    R1|       |       |       |       |       |       |       |       |    R1|
    14    |       |    R3|    R3|    R3|       |       |       |       |       |       |       |       |    R3|
 ____________________________________________________________________________________________________________________________________________
-输入待分析的字符串：
 steps          op-stack       input          operation           state-stack    ACTION         GOTO           
-1              #              a+(b+c)*d#     shift               0              S5                            
-2              #a             +(b+c)*d#      reduce(F->a)        05             R6             3              
-3              #F             +(b+c)*d#      reduce(T->F)        03             R4             4              
-4              #T             +(b+c)*d#      reduce(E->T)        04             R2             2              
-5              #E             +(b+c)*d#      shift               02             S10                           
-6              #E+            (b+c)*d#       shift               0210           S1                            
-7              #E+(           b+c)*d#        shift               02101          S6                            
-8              #E+(b          +c)*d#         reduce(F->b)        021016         R7             3              
-9              #E+(F          +c)*d#         reduce(T->F)        021013         R4             4              
-10             #E+(T          +c)*d#         reduce(E->T)        021014         R2             9              
-11             #E+(E          +c)*d#         shift               021019         S10                           
-12             #E+(E+         c)*d#          shift               02101910       S7                            
-13             #E+(E+c        )*d#           reduce(F->c)        021019107      R8             3              
-14             #E+(E+F        )*d#           reduce(T->F)        021019103      R4             13             
-15             #E+(E+T        )*d#           reduce(E->E+T)      0210191013     R1             9              
-16             #E+(E          )*d#           shift               021019         S12                           
-17             #E+(E)         *d#            reduce(F->(E))      02101912       R5             3              
-18             #E+F           *d#            reduce(T->F)        02103          R4             13             
-19             #E+T           *d#            shift               021013         S11                           
-20             #E+T*          d#             shift               02101311       S8                            
-21             #E+T*d         #              reduce(F->d)        021013118      R9             14             
-22             #E+T*F         #              reduce(T->T*F)      0210131114     R3             13             
-23             #E+T           #              reduce(E->E+T)      021013         R1             2              
-24             #E             #              accept              02             acc                           
-abc+d*+
+1              #              a+b+c+d+a#     shift               0              S5                            
+2              #a             +b+c+d+a#      reduce(F->a)        05             R6             3              
+3              #F             +b+c+d+a#      reduce(T->F)        03             R4             4              
+4              #T             +b+c+d+a#      reduce(E->T)        04             R2             2              
+5              #E             +b+c+d+a#      shift               02             S10                           
+6              #E+            b+c+d+a#       shift               0210           S6                            
+7              #E+b           +c+d+a#        reduce(F->b)        02106          R7             3              
+8              #E+F           +c+d+a#        reduce(T->F)        02103          R4             13             
+9              #E+T           +c+d+a#        reduce(E->E+T)      021013         R1             2              
+10             #E             +c+d+a#        shift               02             S10                           
+11             #E+            c+d+a#         shift               0210           S7                            
+12             #E+c           +d+a#          reduce(F->c)        02107          R8             3              
+13             #E+F           +d+a#          reduce(T->F)        02103          R4             13             
+14             #E+T           +d+a#          reduce(E->E+T)      021013         R1             2              
+15             #E             +d+a#          shift               02             S10                           
+16             #E+            d+a#           shift               0210           S8                            
+17             #E+d           +a#            reduce(F->d)        02108          R9             3              
+18             #E+F           +a#            reduce(T->F)        02103          R4             13             
+19             #E+T           +a#            reduce(E->E+T)      021013         R1             2              
+20             #E             +a#            shift               02             S10                           
+21             #E+            a#             shift               0210           S5                            
+22             #E+a           #              reduce(F->a)        02105          R6             3              
+23             #E+F           #              reduce(T->F)        02103          R4             13             
+24             #E+T           #              reduce(E->E+T)      021013         R1             2              
+25             #E             #              accept              02             acc                           
+逆波兰表达式：
+ab+c+d+a+

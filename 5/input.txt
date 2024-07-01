@@ -10,4 +10,4 @@ F->a
 F->b
 F->c
 F->d
-a+(b+c)*d
+a+b+c+d+a
