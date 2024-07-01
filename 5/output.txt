@@ -1,0 +1,181 @@
+输入开始符号：
+输入文法个数和文法：-------------------------项目表-------------------------
+S->.E back:0 id:0
+S->E. back:0 id:1
+E->.E+T back:1 id:2
+E->E.+T back:1 id:3
+E->E+.T back:1 id:4
+E->E+T. back:1 id:5
+E->.T back:2 id:6
+E->T. back:2 id:7
+T->.T*F back:3 id:8
+T->T.*F back:3 id:9
+T->T*.F back:3 id:10
+T->T*F. back:3 id:11
+T->.F back:4 id:12
+T->F. back:4 id:13
+F->.(E) back:5 id:14
+F->(.E) back:5 id:15
+F->(E.) back:5 id:16
+F->(E). back:5 id:17
+F->.a back:6 id:18
+F->a. back:6 id:19
+F->.b back:7 id:20
+F->b. back:7 id:21
+F->.c back:8 id:22
+F->c. back:8 id:23
+F->.d back:9 id:24
+F->d. back:9 id:25
+--------------------------------------------------------
+****************FIRST集***************************
+FIRST(E)={(,a,b,c,d}
+FIRST(F)={(,a,b,c,d}
+FIRST(S)={(,a,b,c,d}
+FIRST(T)={(,a,b,c,d}
+-------------CLOSURE---------------------
+               closure-I0     
+E->.E+T
+E->.T
+F->.(E)
+F->.a
+F->.b
+F->.c
+F->.d
+S->.E
+T->.F
+T->.T*F
+               closure-I1     
+E->.E+T
+E->.T
+F->(.E)
+F->.(E)
+F->.a
+F->.b
+F->.c
+F->.d
+T->.F
+T->.T*F
+               closure-I2     
+E->E.+T
+S->E.
+               closure-I3     
+T->F.
+               closure-I4     
+E->T.
+T->T.*F
+               closure-I5     
+F->a.
+               closure-I6     
+F->b.
+               closure-I7     
+F->c.
+               closure-I8     
+F->d.
+               closure-I9     
+E->E.+T
+F->(E.)
+               closure-I10    
+E->E+.T
+F->.(E)
+F->.a
+F->.b
+F->.c
+F->.d
+T->.F
+T->.T*F
+               closure-I11    
+F->.(E)
+F->.a
+F->.b
+F->.c
+F->.d
+T->T*.F
+               closure-I12    
+F->(E).
+               closure-I13    
+E->E+T.
+T->T.*F
+               closure-I14    
+T->T*F.
+
+---------------EDGE----------------------
+I0--(--I1
+I0--E--I2
+I0--F--I3
+I0--T--I4
+I0--a--I5
+I0--b--I6
+I0--c--I7
+I0--d--I8
+I1--(--I1
+I1--F--I3
+I1--T--I4
+I1--a--I5
+I1--b--I6
+I1--c--I7
+I1--d--I8
+I1--E--I9
+I2--+--I10
+I4--*--I11
+I9--+--I10
+I9--)--I12
+I10--(--I1
+I10--F--I3
+I10--a--I5
+I10--b--I6
+I10--c--I7
+I10--d--I8
+I10--T--I13
+I11--(--I1
+I11--a--I5
+I11--b--I6
+I11--c--I7
+I11--d--I8
+I11--F--I14
+I13--*--I11
+_________________________LR(0)分析表________________________
+       |    (    |    )    |    *    |    +    |    E    |    F    |    S    |    T    |    a    |    b    |    c    |    d    |    #    |
+____________________________________________________________________________________________________________________________________________
+    0    |    S1|       |       |       |    2  |    3  |       |    4  |    S5|    S6|    S7|    S8|       |
+    1    |    S1|       |       |       |    9  |    3  |       |    4  |    S5|    S6|    S7|    S8|       |
+    2    |       |       |       |   S10|       |       |       |       |       |       |       |       |   acc|
+    3    |       |    R4|    R4|    R4|       |       |       |       |       |       |       |       |    R4|
+    4    |       |    R2|   S11|    R2|       |       |       |       |       |       |       |       |    R2|
+    5    |       |    R6|    R6|    R6|       |       |       |       |       |       |       |       |    R6|
+    6    |       |    R7|    R7|    R7|       |       |       |       |       |       |       |       |    R7|
+    7    |       |    R8|    R8|    R8|       |       |       |       |       |       |       |       |    R8|
+    8    |       |    R9|    R9|    R9|       |       |       |       |       |       |       |       |    R9|
+    9    |       |   S12|       |   S10|       |       |       |       |       |       |       |       |       |
+   10    |    S1|       |       |       |       |    3  |       |   13  |    S5|    S6|    S7|    S8|       |
+   11    |    S1|       |       |       |       |   14  |       |       |    S5|    S6|    S7|    S8|       |
+   12    |       |    R5|    R5|    R5|       |       |       |       |       |       |       |       |    R5|
+   13    |       |    R1|   S11|    R1|       |       |       |       |       |       |       |       |    R1|
+   14    |       |    R3|    R3|    R3|       |       |       |       |       |       |       |       |    R3|
+____________________________________________________________________________________________________________________________________________
+输入待分析的字符串：
+steps          op-stack       input          operation           state-stack    ACTION         GOTO           
+1              #              a+(b+c)*d#     shift               0              S5                            
+2              #a             +(b+c)*d#      reduce(F->a)        05             R6             3              
+3              #F             +(b+c)*d#      reduce(T->F)        03             R4             4              
+4              #T             +(b+c)*d#      reduce(E->T)        04             R2             2              
+5              #E             +(b+c)*d#      shift               02             S10                           
+6              #E+            (b+c)*d#       shift               0210           S1                            
+7              #E+(           b+c)*d#        shift               02101          S6                            
+8              #E+(b          +c)*d#         reduce(F->b)        021016         R7             3              
+9              #E+(F          +c)*d#         reduce(T->F)        021013         R4             4              
+10             #E+(T          +c)*d#         reduce(E->T)        021014         R2             9              
+11             #E+(E          +c)*d#         shift               021019         S10                           
+12             #E+(E+         c)*d#          shift               02101910       S7                            
+13             #E+(E+c        )*d#           reduce(F->c)        021019107      R8             3              
+14             #E+(E+F        )*d#           reduce(T->F)        021019103      R4             13             
+15             #E+(E+T        )*d#           reduce(E->E+T)      0210191013     R1             9              
+16             #E+(E          )*d#           shift               021019         S12                           
+17             #E+(E)         *d#            reduce(F->(E))      02101912       R5             3              
+18             #E+F           *d#            reduce(T->F)        02103          R4             13             
+19             #E+T           *d#            shift               021013         S11                           
+20             #E+T*          d#             shift               02101311       S8                            
+21             #E+T*d         #              reduce(F->d)        021013118      R9             14             
+22             #E+T*F         #              reduce(T->T*F)      0210131114     R3             13             
+23             #E+T           #              reduce(E->E+T)      021013         R1             2              
+24             #E             #              accept              02             acc                           
+abc+d*+
