@@ -7,4 +7,4 @@ echo 运行程序：
 echo 输入的内容：
 cat input.txt
 echo 输出的内容：
-./symbolicTable < input.txt
+./symbolicTable.out < input.txt
