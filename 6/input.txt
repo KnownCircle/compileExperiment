@@ -1,6 +1,14 @@
+// 这是输入文档， 使用//写注释
+// int/char 变量名 值 作用域
+// function 函数名 作用域 返回类型 形参0类型 形参0名称 形参1类型 形参1名称 形参2类型 形参2名称 形参3类型 形参3名称 
+// intArray/charArray 数组名 数组长度 作用域
+// constString 字符串内容
+// 类型：0-void 1-int 2-char 3-function 4-intArray/int* 5-charArray/char* 6-constString
+
 int i0 10086 0
-char i0 1 0
+char i0 $ 0
 char c # 0
+// 这是一行注释
 function main 0 0 1 argc 5 argv 0 a2 0 a3
 function printf main 1 5 str0 5 str1 5 str2 1 num
 intArray list 30 main

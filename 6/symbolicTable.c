@@ -541,6 +541,12 @@ void readData()
                 insertConstString(str);
             }
         }
+        else if(strcmp("//",str)==0){
+            char c;
+            while((c=getchar())!='\n'){
+                continue;
+            }
+        }
         else
         {
             fprintf(stderr, "Error: %s\n", str);
