@@ -1,4 +1,7 @@
-// in this program ,read a program from stdin and the output is the symbolic table
+/*
+* @Author: 李芝塬 Li Zhiyuan
+* @Email zhiyuanli0122@outlook.com
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,7 +20,6 @@
 
 typedef struct
 {
-    // 每个函数 arg_type是函数的参数类型， arg_value是形参名称。 最多支持4个参数
     char *name;
     int returnType;
     int arg0_type;
@@ -39,7 +41,7 @@ struct SymbolEntry
     int val; // 对于int与char是值， 对于int arrary, char arrary, constStr是长度
     function *fun;
     char *constString;
-    function *level; // 0为全局变量，function为所在的函数
+    function *level; // globalVariable为全局变量，function为所在的函数
     struct SymbolEntry *next;
 };
 
@@ -258,7 +260,7 @@ struct SymbolEntry *findSymbol(char *name)
         {
             return entry;
         }
-        entry = entry->next; // 假设使用链表解决冲突
+        entry = entry->next;
     }
     return NULL;
 }
@@ -285,10 +287,8 @@ void printSymbolTable()
     for (int i = 0; i < TABLE_SIZE; i++)
     {
         struct SymbolEntry *entry = symbolTable[i];
-        // printf("out of while:  %p\n", entry);
         while (entry != NULL)
         {
-            // printf("in while:  %p\n", entry);
             printf("name:\t%s\n", entry->name);
             if (entry->type == 1)
             {
@@ -296,7 +296,6 @@ void printSymbolTable()
             }
             else if (entry->type == 2)
             {
-                // printf("%p\n", entry->level);
                 printf("\ttype: char\n\tval: %c\n\tlevel: %s\n", (char)(entry->val), entry->level->name);
             }
             else if (entry->type == 3)
@@ -325,10 +324,6 @@ void printSymbolTable()
             {
                 printf("Error!\ttpe: %d\n", entry->type);
             }
-            // printf("Name: %s , Type: %d , val: %d , constString: %s , nextName: %s\n", entry->name, entry->type, entry->val,entry->constString, entry->next->name);
-            // if(entry->type==3){
-            //     printf("function %s \nreturnType: %d, arg0_type: %d, arg0_name: %s, arg1_type: %d, arg1_name: %s, arg2_type: %d, arg2_name: %s, arg3_type: %d, arg3_name: %s\n", entry->fun->name, entry->fun->returnType, entry->fun->arg0_type, entry->fun->arg0_name, entry->fun->arg1_type, entry->fun->arg1_name, entry->fun->arg2_type, entry->fun->arg2_name, entry->fun->arg3_type, entry->fun->arg3_name);
-            // }
             entry = entry->next;
         }
     }
@@ -541,9 +536,11 @@ void readData()
                 insertConstString(str);
             }
         }
-        else if(strcmp("//",str)==0){
+        else if (strcmp("//", str) == 0)
+        {
             char c;
-            while((c=getchar())!='\n'){
+            while ((c = getchar()) != '\n')
+            {
                 continue;
             }
         }
@@ -559,6 +556,5 @@ int main()
 {
     initSymbolTable();
     readData();
-    // printf("已经读取所有数据\n");
     printSymbolTable();
 }
