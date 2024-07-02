@@ -1,0 +1,11 @@
+int i0 10086 0
+char i0 1 0
+char c # 0
+function main 0 0 1 argc 5 argv 0 a2 0 a3
+function printf main 1 5 str0 5 str1 5 str2 1 num
+intArray list 30 main
+charArray str 500 notExistFunc
+constString zhiyuanli0122@outlook.com
+constString zhiyuanli0122@outlook.com
+constString 李芝塬
+
