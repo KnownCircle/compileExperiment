@@ -1,0 +1,5 @@
+a < b and c > d or e == f
+a < b and c > d or e == f and g != h and i < j
+Tom == Jerry and Mary != Lily and John == Mike and Kate == Lisa
+a <= b or c < d and e >= f and g != h and i == j and k == l and m == n and o == p and q >= r and s <= t and u < v and w >= x and y == z 
+q
